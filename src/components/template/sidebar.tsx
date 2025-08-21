@@ -40,14 +40,14 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white border-r transform transition-transform duration-300 z-50 
+        className={`fixed top-0 left-0 h-full w-64 bg-white border-r transform transition-transform duration-300 z-50 md:z-40 
         ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 md:relative md:h-auto md:flex md:flex-col md:w-48`}>
         {/* Header */}
         <div className="p-4">
           <h2 className="text-lg text-center font-semibold edn-color-primary">
-            Menu
+            Formations
           </h2>
           <Separator className="mt-2" />
         </div>
@@ -62,19 +62,19 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
               <AccordionItem
                 key={formation.id}
                 value={String(formation.id)}
-                className="border-none">
+                className="border-none py-1">
                 <AccordionTrigger className="edn-color-primary cursor-pointer bg-gray-100 rounded-none px-2 py-2 text-sm hover:no-underline">
                   {formation.title}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <nav className="pl-2 space-y-1 edn-color-primary">
+                  <nav className="pl-2 space-y-1 edn-color-primary my-2">
                     {formation.modules.map((module) => {
                       const active = location.pathname === module.href;
                       return (
                         <Link
                           key={module.id}
                           to={module.href}
-                          className={`block rounded-md px-2 py-2 text-sm edn-color-primary hover:underline ${
+                          className={`block rounded-none px-2 py-2 text-sm edn-color-primary hover:underline ${
                             active ? "bg-gray-100 font-medium" : ""
                           }`}>
                           {module.title}
@@ -92,7 +92,7 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
         <div className="flex flex-col border-t p-4 space-y-2 fixed bottom-0 w-full">
           <Link
             to="/badges"
-            className=" text-center edn-color-primary cursor-pointer bg-gray-100 rounded-none px-2 py-2 text-sm hover:no-underline">
+            className="edn-color-primary cursor-pointer bg-gray-100 rounded-none px-2 py-2 text-sm hover:no-underline">
             Mes Badges
           </Link>
           <Button
@@ -111,7 +111,7 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
         {/* Un overlay sombre quand la sidebar est ouverte sur mobile */}
         {isOpen && (
           <div
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            className="fixed inset-0 bg-black/50 z-30 md:hidden"
             onClick={() => setIsOpen(false)}
           />
         )}

@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
 import Layout from "./components/template/layout";
 import Sidebar from "./components/template/sidebar";
+import ModulePage from "./pages/Module";
 
 export default function App() {
   const [token, setToken] = React.useState<string | null>(() =>
@@ -73,6 +74,10 @@ export default function App() {
                   <Navigate to="/login" />
                 )
               }
+            />
+            <Route
+              path="/formation/:formationId/module/:moduleId"
+              element={token ? <ModulePage /> : <Navigate to="/login" />}
             />
           </Route>
           <Route

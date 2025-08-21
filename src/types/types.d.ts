@@ -50,14 +50,41 @@ type DashboardProps = {
     onLogout: () => void;
 };
 
+interface ModuleContent {
+    id: number;
+    subtitle: string;
+    text: string;
+}
+
 interface Module {
     id: number;
     title: string;
     href: string;
+    urlIllustration: string;
+    content?: ModuleContent[];
 }
 
 interface Formation {
     id: number;
     title: string;
     modules: Module[];
+    quizzes?: Quizz[];
+}
+
+interface Quizz {
+    id: number;
+    title: string;
+    questions: Question[];
+}
+
+interface Question {
+    id: number;
+    question: string;
+    answers: Answer[]; // plusieurs réponses
+}
+
+interface Answer {
+    id: number;
+    text: string;
+    isCorrect: boolean; // true si c'est la bonne réponse
 }

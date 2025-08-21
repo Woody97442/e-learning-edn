@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/navigation-menu";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "../ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 
 // Définition des items du menu
 const navItems = [
@@ -122,7 +123,7 @@ export default function NavBar() {
   return (
     <>
       {/* Desktop Navigation */}
-      <div className="hidden md:flex">
+      <div className="hidden md:flex ">
         <NavigationMenu viewport={false}>
           <NavigationMenuList>
             {navItems.map((item, i) => (
@@ -196,47 +197,40 @@ export default function NavBar() {
           onClick={() => setIsOpen(!isOpen)}>
           <span className="text-2xl font-bold mr-2">☰</span>
         </Button>
-
         {/* Drawer mobile */}
         <div
           className={`fixed top-0 left-0 h-full w-64 bg-white border-r shadow-lg transform transition-transform duration-300 z-50 ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}>
-          <div className="p-4 flex justify-between items-center border-b">
-            <h2 className="text-lg font-bold">Menu</h2>
-            <Button
-              variant="ghost"
-              onClick={() => setIsOpen(false)}>
-              ✕
-            </Button>
-          </div>
-
-          <nav className="flex flex-col p-4 space-y-2">
-            {navItems.map((item, i) => (
-              <div key={i}>
-                <Link
-                  to={item.href ?? "#"}
-                  className="block py-2 text-sm font-medium"
-                  onClick={() => setIsOpen(false)}>
-                  {item.label}
-                </Link>
-                {item.children && (
-                  <ul className="ml-4 mt-1 space-y-1 text-sm">
-                    {item.children.map((child, j) => (
-                      <li key={j}>
-                        <Link
-                          to={child.href}
-                          className="block py-1 text-gray-600"
-                          onClick={() => setIsOpen(false)}>
-                          {child.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </nav>
+          {/* Contenu scrollable */}
+          <ScrollArea className="h-full">
+            <nav className="flex flex-col p-4 space-y-2">
+              {navItems.map((item, i) => (
+                <div key={i}>
+                  <Link
+                    to={item.href ?? "#"}
+                    className="block bg-gray-100 font-bold px-2 py-2 text-sm edn-color-primary"
+                    onClick={() => setIsOpen(false)}>
+                    {item.label}
+                  </Link>
+                  {item.children && (
+                    <ul className="ml-4 mt-1 space-y-1 text-sm edn-color-primary">
+                      {item.children.map((child, j) => (
+                        <li key={j}>
+                          <Link
+                            to={child.href}
+                            className="block py-1 edn-color-primary"
+                            onClick={() => setIsOpen(false)}>
+                            {child.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </nav>
+          </ScrollArea>
         </div>
         {/* Overlay */}
         {isOpen && (
