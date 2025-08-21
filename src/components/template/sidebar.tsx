@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 
 export default function Sidebar({ onLogout }: { onLogout: () => void }) {
   const [formations, setFormations] = useState<Formation[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,8 +31,19 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
 
   return (
     <div className="flex min-h-[calc(100vh-160px)]">
+      {/* Bouton hamburger visible que sur mobile */}
+      <Button
+        className="md:hidden m-2 fixed top-20 -left-6 z-40"
+        onClick={() => setIsOpen(!isOpen)}>
+        <span className="text-xl font-bold translate-x-2">{">"}</span>
+      </Button>
+
       {/* Sidebar */}
-      <aside className="w-48 flex flex-col border-r bg-white">
+      <aside
+        className={`fixed top-0 left-0 h-full w-64 bg-white border-r transform transition-transform duration-300 z-50 
+        ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 md:relative md:h-auto md:flex md:flex-col md:w-48`}>
         {/* Header */}
         <div className="p-4">
           <h2 className="text-lg text-center font-semibold edn-color-primary">
@@ -77,7 +89,7 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
         </ScrollArea>
 
         {/* Fixed bottom area */}
-        <div className="flex flex-col border-t p-4 space-y-2">
+        <div className="flex flex-col border-t p-4 space-y-2 fixed bottom-0 w-full">
           <Link
             to="/badges"
             className=" text-center edn-color-primary cursor-pointer bg-gray-100 rounded-none px-2 py-2 text-sm hover:no-underline">
@@ -96,6 +108,13 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
 
       {/* Main content */}
       <main className="flex-1 overflow-auto">
+        {/* Un overlay sombre quand la sidebar est ouverte sur mobile */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
         <Outlet />
       </main>
     </div>

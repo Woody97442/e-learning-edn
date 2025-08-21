@@ -8,7 +8,9 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "../ui/button";
 
 // Définition des items du menu
 const navItems = [
@@ -115,66 +117,135 @@ const navItems = [
 ];
 
 export default function NavBar() {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <NavigationMenu viewport={false}>
-      <NavigationMenuList>
-        {navItems.map((item, i) => (
-          <NavigationMenuItem key={i}>
-            {item.children ? (
-              <>
-                <NavigationMenuTrigger
-                  className={item.color}
-                  style={{
-                    color: item.hex,
-                    fontSize: "13px",
-                    fontWeight: "bold",
-                  }}>
-                  <Link
-                    to={item.href ?? "#"}
-                    className={`${item.color} `}>
-                    {item.label}
-                  </Link>
-                </NavigationMenuTrigger>
-                <NavigationMenuContent
-                  className=" bg-white p-2"
-                  style={{
-                    borderRadius: "0px",
-                    marginTop: "22px",
-                    boxShadow: "none",
-                    borderTop: "3px solid #c8d300",
-                    width: "200px",
-                  }}>
-                  <ul className="flex flex-col">
+    <>
+      {/* Desktop Navigation */}
+      <div className="hidden md:flex">
+        <NavigationMenu viewport={false}>
+          <NavigationMenuList>
+            {navItems.map((item, i) => (
+              <NavigationMenuItem key={i}>
+                {item.children ? (
+                  <>
+                    <NavigationMenuTrigger
+                      className={item.color}
+                      style={{
+                        color: item.hex,
+                        fontSize: "13px",
+                        fontWeight: "bold",
+                      }}>
+                      <Link
+                        to={item.href ?? "#"}
+                        className={`${item.color} `}>
+                        {item.label}
+                      </Link>
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent
+                      className=" bg-white p-2"
+                      style={{
+                        borderRadius: "0px",
+                        marginTop: "22px",
+                        boxShadow: "none",
+                        borderTop: "3px solid #c8d300",
+                        width: "200px",
+                      }}>
+                      <ul className="flex flex-col">
+                        {item.children.map((child, j) => (
+                          <li
+                            key={j}
+                            className="px-2">
+                            <NavigationMenuLink asChild>
+                              <Link
+                                to={child.href}
+                                className="block text-sm "
+                                style={{
+                                  borderRadius: "0px",
+                                  fontSize: "12px",
+                                }}>
+                                {child.label}
+                              </Link>
+                            </NavigationMenuLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </>
+                ) : (
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to={item.href ?? "#"}
+                      className={`${item.color} `}
+                      style={{ fontSize: "13px", fontWeight: "bold" }}>
+                      {item.label}
+                    </Link>
+                  </NavigationMenuLink>
+                )}
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+      </div>
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden">
+        <Button
+          variant="ghost"
+          className="p-2 edn-color-primary"
+          onClick={() => setIsOpen(!isOpen)}>
+          <span className="text-2xl font-bold mr-2">☰</span>
+        </Button>
+
+        {/* Drawer mobile */}
+        <div
+          className={`fixed top-0 left-0 h-full w-64 bg-white border-r shadow-lg transform transition-transform duration-300 z-50 ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}>
+          <div className="p-4 flex justify-between items-center border-b">
+            <h2 className="text-lg font-bold">Menu</h2>
+            <Button
+              variant="ghost"
+              onClick={() => setIsOpen(false)}>
+              ✕
+            </Button>
+          </div>
+
+          <nav className="flex flex-col p-4 space-y-2">
+            {navItems.map((item, i) => (
+              <div key={i}>
+                <Link
+                  to={item.href ?? "#"}
+                  className="block py-2 text-sm font-medium"
+                  onClick={() => setIsOpen(false)}>
+                  {item.label}
+                </Link>
+                {item.children && (
+                  <ul className="ml-4 mt-1 space-y-1 text-sm">
                     {item.children.map((child, j) => (
-                      <li
-                        key={j}
-                        className="px-2">
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to={child.href}
-                            className="block text-sm "
-                            style={{ borderRadius: "0px", fontSize: "12px" }}>
-                            {child.label}
-                          </Link>
-                        </NavigationMenuLink>
+                      <li key={j}>
+                        <Link
+                          to={child.href}
+                          className="block py-1 text-gray-600"
+                          onClick={() => setIsOpen(false)}>
+                          {child.label}
+                        </Link>
                       </li>
                     ))}
                   </ul>
-                </NavigationMenuContent>
-              </>
-            ) : (
-              <NavigationMenuLink asChild>
-                <Link
-                  to={item.href ?? "#"}
-                  className={`${item.color} `}
-                  style={{ fontSize: "13px", fontWeight: "bold" }}>
-                  {item.label}
-                </Link>
-              </NavigationMenuLink>
-            )}
-          </NavigationMenuItem>
-        ))}
-      </NavigationMenuList>
-    </NavigationMenu>
+                )}
+              </div>
+            ))}
+          </nav>
+        </div>
+        {/* Overlay */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+      </div>
+    </>
   );
 }
