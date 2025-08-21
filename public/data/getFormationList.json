@@ -47,6 +47,7 @@
             {
                 "id": 1,
                 "title": "Quiz Cybersécurité",
+                "numberOfQuestions": 2,
                 "questions": [
                     {
                         "id": 1,
@@ -355,6 +356,7 @@
             {
                 "id": 1,
                 "title": "Quiz Dév Web",
+                "numberOfQuestions": 10,
                 "questions": [
                     {
                         "id": 1,

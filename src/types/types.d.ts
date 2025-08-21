@@ -1,8 +1,17 @@
 interface User {
-    id: string;
+    id?: string;
     name: string;
     email: string;
     role?: string;
+    badges?: Badge[];
+}
+
+interface Badge {
+    id?: string;
+    title: string;
+    score: number;
+    tentative: number;
+    validated: boolean;
 }
 
 interface LoginCredentials {
@@ -74,6 +83,7 @@ interface Formation {
 interface Quizz {
     id: number;
     title: string;
+    numberOfQuestions: number;
     questions: Question[];
 }
 

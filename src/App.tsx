@@ -6,6 +6,8 @@ import Register from "./pages/Register";
 import Layout from "./components/template/layout";
 import Sidebar from "./components/template/sidebar";
 import ModulePage from "./pages/Module";
+import QuizzPage from "./pages/Quizz";
+import BadgesPage from "./pages/Badges";
 
 export default function App() {
   const [token, setToken] = React.useState<string | null>(() =>
@@ -78,6 +80,16 @@ export default function App() {
             <Route
               path="/formation/:formationId/module/:moduleId"
               element={token ? <ModulePage /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/formation/:formationId/quizz/:quizzId"
+              element={token ? <QuizzPage /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/mes-badges"
+              element={
+                token ? <BadgesPage token={token} /> : <Navigate to="/login" />
+              }
             />
           </Route>
           <Route

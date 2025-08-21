@@ -91,7 +91,7 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
         {/* Fixed bottom area */}
         <div className="flex flex-col border-t p-4 space-y-2 fixed bottom-0 w-full">
           <Link
-            to="/badges"
+            to="/mes-badges"
             className="edn-color-primary cursor-pointer bg-gray-100 rounded-none px-2 py-2 text-sm hover:no-underline">
             Mes Badges
           </Link>

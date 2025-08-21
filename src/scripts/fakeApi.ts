@@ -1,4 +1,3 @@
-import type { LoginCredentials, LoginResponse, RegisterResponse, User } from "../types/types";
 
 export async function fakeLogin({ email, password }: LoginCredentials): Promise<LoginResponse> {
     await new Promise(r => setTimeout(r, 500));
@@ -7,7 +6,6 @@ export async function fakeLogin({ email, password }: LoginCredentials): Promise<
             ok: true,
             token: "fake-jwt-token",
             user: {
-                id: "1",
                 name: "Jean Dupont",
                 email: "test@test.com",
             }
@@ -24,7 +22,13 @@ export async function fakeGetUserInfo(token: string): Promise<User> {
             id: "1",
             name: "Jean Dupont",
             email: "test@test.com",
-            role: "Utilisateur",
+            role: "user",
+            badges: [
+                { id: "1", title: "Cybersécurité", score: 89, tentative: 2, validated: true },
+                { id: "2", title: "Dév Web", score: 100, tentative: 1, validated: true },
+                { id: "3", title: "Quiz Cybersécurité", score: 100, tentative: 1, validated: true },
+                { id: "4", title: "Quiz Dév Web", score: 100, tentative: 1, validated: true },
+            ]
         };
     }
     throw new Error("Token invalide");

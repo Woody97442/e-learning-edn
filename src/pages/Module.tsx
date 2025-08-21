@@ -1,14 +1,15 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Banner from "@/components/banner/banner";
 
 export default function ModulePage() {
   const { formationId, moduleId } = useParams();
+  const navigate = useNavigate();
   const [formation, setFormation] = useState<Formation | null>(null);
   const [module, setModule] = useState<Module | null>(null);
 
   useEffect(() => {
-    fetch("/data/getFormationList.json") // fichier dans public/
+    fetch("/data/getFormationList.json")
       .then((res) => res.json())
       .then((data: Formation[]) => {
         const foundFormation = data.find((f) => f.id === Number(formationId));
@@ -27,8 +28,24 @@ export default function ModulePage() {
     return <p className="p-4">Module introuvable 🚫</p>;
   }
 
+  // Gestion du module suivant ou du quizz
+  const currentIndex = formation.modules.findIndex((m) => m.id === module.id);
+  const isLastModule = currentIndex === formation.modules.length - 1;
+
+  const handleNext = () => {
+    if (!isLastModule) {
+      const nextModule = formation.modules[currentIndex + 1];
+      navigate(`/formation/${formation.id}/module/${nextModule.id}`);
+    } else {
+      // Redirige vers le premier quizz si présent
+      if (formation.quizzes && formation.quizzes.length > 0) {
+        navigate(`/formation/${formation.id}/quizz/${formation.quizzes[0].id}`);
+      }
+    }
+  };
+
   return (
-    <div className="p-10 max-w-4xl mx-auto">
+    <div className="p-10 max-w-4xl mx-auto relative">
       <Banner title={`${formation.title} - ${module.title}`} />
 
       {/* Vidéo */}
@@ -55,6 +72,19 @@ export default function ModulePage() {
           ))}
         </div>
       )}
+
+      {/* Bouton suivant */}
+      <div className="mt-8 flex justify-end">
+        <button
+          onClick={handleNext}
+          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-500">
+          {isLastModule
+            ? formation.quizzes && formation.quizzes.length > 0
+              ? "Passer au Quizz"
+              : "Fin de la formation"
+            : "Module suivant"}
+        </button>
+      </div>
     </div>
   );
 }
