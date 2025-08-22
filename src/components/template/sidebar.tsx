@@ -11,10 +11,17 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { useEffect, useState } from "react";
-
-export default function Sidebar({ onLogout }: { onLogout: () => void }) {
+import { fakeGetUserInfo } from "@/scripts/fakeApi";
+export default function Sidebar({
+  onLogout,
+  token,
+}: {
+  token: string;
+  onLogout: () => void;
+}) {
   const [formations, setFormations] = useState<Formation[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -23,6 +30,18 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
       .then((res) => res.json())
       .then((data: Formation[]) => setFormations(data));
   }, []);
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const user = await fakeGetUserInfo(token);
+        setUser(user);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    loadUser();
+  }, [token]);
 
   const handleLogout = () => {
     onLogout();
@@ -90,11 +109,26 @@ export default function Sidebar({ onLogout }: { onLogout: () => void }) {
 
         {/* Fixed bottom area */}
         <div className="flex flex-col border-t p-4 space-y-2 fixed bottom-0 w-full">
-          <Link
-            to="/mes-badges"
-            className="edn-color-primary cursor-pointer bg-gray-100 rounded-none px-2 py-2 text-sm hover:no-underline">
-            Mes Badges
-          </Link>
+          {user?.role === "admin" ? (
+            <>
+              <Link
+                to="/admin/dashboard"
+                className="edn-color-primary cursor-pointer bg-gray-100 rounded-none px-2 py-2 text-sm hover:no-underline">
+                Tableau de bord
+              </Link>
+              <Link
+                to="/admin/formations"
+                className="edn-color-primary cursor-pointer bg-gray-100 rounded-none px-2 py-2 text-sm hover:no-underline">
+                Les Formations
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/mes-badges"
+              className="edn-color-primary cursor-pointer bg-gray-100 rounded-none px-2 py-2 text-sm hover:no-underline">
+              Mes Badges
+            </Link>
+          )}
           <Button
             variant="edn_hover"
             className="cursor-pointer"

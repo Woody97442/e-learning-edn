@@ -69,6 +69,7 @@ interface Module {
     id: number;
     title: string;
     href: string;
+    position: number;
     urlIllustration: string;
     content?: ModuleContent[];
 }

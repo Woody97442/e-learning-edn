@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -8,15 +8,29 @@ import Sidebar from "./components/template/sidebar";
 import ModulePage from "./pages/Module";
 import QuizzPage from "./pages/Quizz";
 import BadgesPage from "./pages/Badges";
+import { fakeGetUserInfo } from "./scripts/fakeApi";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminFormations from "./pages/admin/AdminFormations";
+import AdminCreateFormation from "./pages/admin/AdminCreateFormation";
 
 export default function App() {
-  const [token, setToken] = React.useState<string | null>(() =>
+  const [token, setToken] = useState<string | null>(() =>
     localStorage.getItem("token")
   );
-  const [, setUser] = React.useState<User | null>(() => {
-    const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
-  });
+  const [user, setUser] = useState<User | null>();
+
+  useEffect(() => {
+    async function loadUser() {
+      if (!token) return null;
+      try {
+        const user = await fakeGetUserInfo(token);
+        setUser(user);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    loadUser();
+  }, [token]);
 
   function handleLogin(newToken: string, newUser: User) {
     localStorage.setItem("token", newToken);
@@ -38,6 +52,8 @@ export default function App() {
     setToken(null);
     setUser(null);
   }
+
+  console.log(user);
 
   return (
     <BrowserRouter>
@@ -63,7 +79,17 @@ export default function App() {
               )
             }
           />
-          <Route element={<Sidebar onLogout={handleLogout} />}>
+          <Route
+            element={
+              token ? (
+                <Sidebar
+                  token={token}
+                  onLogout={handleLogout}
+                />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }>
             <Route
               path="/dashboard"
               element={
@@ -89,6 +115,36 @@ export default function App() {
               path="/mes-badges"
               element={
                 token ? <BadgesPage token={token} /> : <Navigate to="/login" />
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                user?.role === "admin" && token ? (
+                  <AdminDashboard />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/admin/formations"
+              element={
+                user?.role === "admin" && token ? (
+                  <AdminFormations />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/admin/formation/create"
+              element={
+                user?.role === "admin" && token ? (
+                  <AdminCreateFormation />
+                ) : (
+                  <Navigate to="/login" />
+                )
               }
             />
           </Route>

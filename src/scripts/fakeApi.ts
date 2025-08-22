@@ -22,7 +22,7 @@ export async function fakeGetUserInfo(token: string): Promise<User> {
             id: "1",
             name: "Jean Dupont",
             email: "test@test.com",
-            role: "user",
+            role: "admin",
             badges: [
                 { id: "1", title: "Cybersécurité", score: 89, tentative: 2, validated: true },
                 { id: "2", title: "Dév Web", score: 100, tentative: 1, validated: true },

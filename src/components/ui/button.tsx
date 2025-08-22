@@ -19,7 +19,6 @@ const buttonVariants = cva(
           rounded-xl
           cursor-pointer
           flex items-center justify-center gap-2
-          hover:border-transparent
           hover:bg-gradient-to-r
           hover:from-primary
           hover:via-secondary
