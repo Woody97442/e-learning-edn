@@ -1,3 +1,5 @@
+"use client";
+
 import Banner from "@/components/banner/banner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,18 +8,35 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 
-export default function AdminCreateFormation() {
-  const [questions, setQuestions] = useState<Question[]>([
-    {
-      id: 1,
-      question: "Exemple de question ?",
-      answers: [
-        { id: 1, text: "Réponse 1", isCorrect: false },
-        { id: 2, text: "Réponse 2", isCorrect: true },
-      ],
-    },
-  ]);
+interface ModuleContent {
+  id: number;
+  subtitle: string;
+  text: string;
+}
 
+interface Module {
+  id: number;
+  title: string;
+  position: number;
+  href: string;
+  urlIllustration: string;
+  content: ModuleContent[];
+}
+
+interface Answer {
+  id: number;
+  text: string;
+  isCorrect: boolean;
+}
+
+interface Question {
+  id: number;
+  question: string;
+  answers: Answer[];
+}
+
+export default function AdminCreateFormation() {
+  // ---------- STATES ----------
   const [modules, setModules] = useState<Module[]>([
     {
       id: 1,
@@ -29,216 +48,197 @@ export default function AdminCreateFormation() {
     },
   ]);
 
+  const [questions, setQuestions] = useState<Question[]>([
+    {
+      id: 1,
+      question: "Exemple de question ?",
+      answers: [
+        { id: 1, text: "Réponse 1", isCorrect: false },
+        { id: 2, text: "Réponse 2", isCorrect: true },
+      ],
+    },
+  ]);
+
   const [editingModuleIndex, setEditingModuleIndex] = useState<number | null>(
     null
   );
-
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<
     number | null
   >(null);
 
-  const handleAddModule = () => {
-    const nextId = modules.length
-      ? Math.max(...modules.map((m) => m.id)) + 1
-      : 1;
-    const newModule: Module = {
-      id: nextId,
-      title: "Nouveau module",
-      position: modules.length + 1,
-      href: "",
-      urlIllustration: "",
-      content: [{ id: 1, subtitle: "", text: "" }],
-    };
-    setModules([...modules, newModule]);
-    setEditingModuleIndex(modules.length);
+  // ---------- UTILS ----------
+  const updateModules = (fn: (copy: Module[]) => void) => {
+    setModules((prev) => {
+      const copy = structuredClone(prev);
+      fn(copy);
+      return copy;
+    });
   };
 
-  const handleEditModule = (index: number) => {
-    setEditingModuleIndex(index);
+  const updateQuestions = (fn: (copy: Question[]) => void) => {
+    setQuestions((prev) => {
+      const copy = structuredClone(prev);
+      fn(copy);
+      return copy;
+    });
+  };
+
+  // ---------- MODULES ----------
+  const handleAddModule = () => {
+    updateModules((mods) => {
+      const nextId = mods.length ? Math.max(...mods.map((m) => m.id)) + 1 : 1;
+      mods.push({
+        id: nextId,
+        title: "Nouveau module",
+        position: mods.length + 1,
+        href: "",
+        urlIllustration: "",
+        content: [{ id: 1, subtitle: "", text: "" }],
+      });
+      setEditingModuleIndex(mods.length - 1);
+    });
   };
 
   const handleChangeModule = (
-    field:
-      | "title"
-      | "href"
-      | "urlIllustration"
-      | "contentSubtitle"
-      | "contentText",
+    field: keyof Module,
     value: string,
     contentIndex?: number
   ) => {
     if (editingModuleIndex === null) return;
-
-    setModules((prevModules) => {
-      const newModules = [...prevModules];
-      const current = newModules[editingModuleIndex];
-
-      switch (field) {
-        case "title":
-          current.title = value;
-          break;
-        case "href":
-          current.href = value;
-          break;
-        case "urlIllustration":
-          current.urlIllustration = value;
-          break;
-        case "contentSubtitle":
-          if (contentIndex !== undefined && current.content) {
-            current.content[contentIndex].subtitle = value;
-          }
-          break;
-        case "contentText":
-          if (contentIndex !== undefined && current.content) {
-            current.content[contentIndex].text = value;
-          }
-          break;
+    updateModules((mods) => {
+      const current = mods[editingModuleIndex];
+      if (
+        field === "title" ||
+        field === "href" ||
+        field === "urlIllustration"
+      ) {
+        current[field] = value;
+      } else if (field === "content" && contentIndex !== undefined) {
+        current.content[contentIndex] = {
+          ...current.content[contentIndex],
+          ...JSON.parse(value),
+        };
       }
-
-      return newModules;
     });
   };
 
   const handleAddContent = () => {
     if (editingModuleIndex === null) return;
-    setModules((prevModules) => {
-      const newModules = [...prevModules];
-      const current = newModules[editingModuleIndex];
-      const nextId = current.content
+    updateModules((mods) => {
+      const current = mods[editingModuleIndex];
+      const nextId = current.content.length
         ? Math.max(...current.content.map((c) => c.id)) + 1
         : 1;
-      const newContent: ModuleContent = { id: nextId, subtitle: "", text: "" };
-      current.content = current.content
-        ? [...current.content, newContent]
-        : [newContent];
-      return newModules;
+      current.content.push({ id: nextId, subtitle: "", text: "" });
     });
   };
 
   const handleRemoveContent = (contentIndex: number) => {
     if (editingModuleIndex === null) return;
-    setModules((prevModules) => {
-      const newModules = [...prevModules];
-      const current = newModules[editingModuleIndex];
-      if (current.content) {
-        current.content = current.content.filter(
-          (_, idx) => idx !== contentIndex
-        );
-      }
-      return newModules;
+    updateModules((mods) => {
+      mods[editingModuleIndex].content = mods[
+        editingModuleIndex
+      ].content.filter((_, i) => i !== contentIndex);
     });
   };
 
+  // ---------- QUESTIONS ----------
   const handleAddQuestion = () => {
-    const nextId = questions.length
-      ? Math.max(...questions.map((q) => q.id)) + 1
-      : 1;
-    const newQuestion: Question = {
-      id: nextId,
-      question: "",
-      answers: [{ id: 1, text: "", isCorrect: false }],
-    };
-    setQuestions([...questions, newQuestion]);
-    setEditingQuestionIndex(questions.length);
-  };
-
-  const handleEditQuestion = (index: number) => {
-    setEditingQuestionIndex(index);
+    updateQuestions((qs) => {
+      const nextId = qs.length ? Math.max(...qs.map((q) => q.id)) + 1 : 1;
+      qs.push({
+        id: nextId,
+        question: "",
+        answers: [{ id: 1, text: "", isCorrect: false }],
+      });
+      setEditingQuestionIndex(qs.length - 1);
+    });
   };
 
   const handleChangeQuestion = (value: string) => {
     if (editingQuestionIndex === null) return;
-    setQuestions((prev) => {
-      const newQ = [...prev];
-      newQ[editingQuestionIndex].question = value;
-      return newQ;
+    updateQuestions((qs) => {
+      qs[editingQuestionIndex].question = value;
     });
   };
 
   const handleAddAnswer = () => {
     if (editingQuestionIndex === null) return;
-    setQuestions((prev) => {
-      const newQ = [...prev];
-      const current = newQ[editingQuestionIndex];
+    updateQuestions((qs) => {
+      const current = qs[editingQuestionIndex];
       const nextId = current.answers.length
         ? Math.max(...current.answers.map((a) => a.id)) + 1
         : 1;
       current.answers.push({ id: nextId, text: "", isCorrect: false });
-      return newQ;
     });
   };
 
   const handleChangeAnswer = (text: string, answerIndex: number) => {
     if (editingQuestionIndex === null) return;
-    setQuestions((prev) => {
-      const newQ = [...prev];
-      newQ[editingQuestionIndex].answers[answerIndex].text = text;
-      return newQ;
+    updateQuestions((qs) => {
+      qs[editingQuestionIndex].answers[answerIndex].text = text;
     });
   };
 
   const handleSetCorrectAnswer = (answerIndex: number) => {
     if (editingQuestionIndex === null) return;
-    setQuestions((prev) => {
-      const newQ = [...prev];
-      newQ[editingQuestionIndex].answers = newQ[
-        editingQuestionIndex
-      ].answers.map((a, idx) => ({ ...a, isCorrect: idx === answerIndex }));
-      return newQ;
+    updateQuestions((qs) => {
+      qs[editingQuestionIndex].answers = qs[editingQuestionIndex].answers.map(
+        (a, idx) => ({
+          ...a,
+          isCorrect: idx === answerIndex,
+        })
+      );
     });
   };
 
   const handleRemoveAnswer = (answerIndex: number) => {
     if (editingQuestionIndex === null) return;
-    setQuestions((prev) => {
-      const newQ = [...prev];
-      newQ[editingQuestionIndex].answers = newQ[
+    updateQuestions((qs) => {
+      qs[editingQuestionIndex].answers = qs[
         editingQuestionIndex
       ].answers.filter((_, idx) => idx !== answerIndex);
-      return newQ;
     });
   };
 
   const handleRemoveQuestion = (questionIndex: number) => {
-    setQuestions((prev) => prev.filter((_, idx) => idx !== questionIndex));
+    updateQuestions((qs) => {
+      qs.splice(questionIndex, 1);
+    });
     if (editingQuestionIndex === questionIndex) setEditingQuestionIndex(null);
   };
 
+  // ---------- RENDER ----------
   return (
     <div className="p-6">
       <Banner title="Création ou modification de formation" />
+
+      {/* --- Infos Formation --- */}
       <div className="flex flex-col gap-6 m-4">
         <p className="my-2 text-xs">
-          Bienvenue sur la page de création et de modification de formation !
-          <br />
-          Ici, vous pouvez concevoir une nouvelle formation ou mettre à jour une
-          formation existante, ajouter autant de modules de cours que
-          nécessaire, et associer à chaque formation un quiz pour évaluer les
-          apprenants.{" "}
+          Bienvenue sur la page de création et modification de formation !
         </p>
+
         <h2 className="text-xl font-bold">Information de la formation :</h2>
         <div className="flex flex-row gap-4 justify-between">
           <div className="grid w-full max-w-sm items-center gap-3">
-            <Label htmlFor="formationTitle">Nom de la formation</Label>
+            <Label>Nom de la formation</Label>
             <Input
-              id="formationTitle"
-              type="text"
               placeholder="La cybersécurité"
               className="border-none bg-gray-100 rounded-none"
             />
           </div>
           <div className="grid w-full max-w-sm items-center gap-3">
-            <Label htmlFor="formationDescription">Description courte</Label>
+            <Label>Description courte</Label>
             <Input
-              id="formationDescription"
-              type="text"
-              placeholder="Sensibilisation aux attaques de phishing et autres dans la cybersécurité."
+              placeholder="Sensibilisation aux attaques de phishing..."
               className="border-none bg-gray-100 rounded-none"
             />
           </div>
         </div>
+
+        {/* --- Modules --- */}
         <div className="flex flex-col gap-4 my-4">
-          {/* Liste des modules */}
           <div className="flex flex-row items-center justify-between">
             <h2 className="text-xl font-bold">Liste des Modules :</h2>
             <Button
@@ -248,12 +248,13 @@ export default function AdminCreateFormation() {
             </Button>
           </div>
 
+          {/* Liste */}
           <div className="overflow-x-auto">
             <table className="min-w-full border-collapse border border-gray-200">
               <thead className="edn-degraded text-white text-left">
                 <tr>
-                  <th className="px-4 py-2 text-center">position</th>
-                  <th className="px-4 py-2 ">Titre</th>
+                  <th className="px-4 py-2 text-center">Position</th>
+                  <th className="px-4 py-2">Titre</th>
                   <th className="px-4 py-2 text-center">Action</th>
                 </tr>
               </thead>
@@ -267,7 +268,7 @@ export default function AdminCreateFormation() {
                     <td className="px-4 py-2 text-center space-x-2">
                       <FaEdit
                         className="inline cursor-pointer text-blue-500 hover:text-blue-700"
-                        onClick={() => handleEditModule(idx)}
+                        onClick={() => setEditingModuleIndex(idx)}
                       />
                       <FaTrash className="inline cursor-pointer text-red-500 hover:text-red-700" />
                     </td>
@@ -277,12 +278,14 @@ export default function AdminCreateFormation() {
             </table>
           </div>
 
-          {/* Formulaire et aperçu du module */}
+          {/* Edition d'un module */}
           {editingModuleIndex !== null && (
-            <div className="mt-6 p-4 ">
+            <div className="mt-6 p-4">
               <h2 className="text-xl font-bold mb-4">
                 Édition du module : {modules[editingModuleIndex].title}
               </h2>
+
+              {/* Inputs */}
               <div className="flex flex-row gap-4 justify-between my-4">
                 <div className="grid w-full max-w-sm items-center gap-3">
                   <Label>Titre du module</Label>
@@ -295,7 +298,6 @@ export default function AdminCreateFormation() {
                     className="border-none bg-gray-100 rounded-none"
                   />
                 </div>
-
                 <div className="grid w-full max-w-sm items-center gap-3">
                   <Label>URL illustration</Label>
                   <Input
@@ -309,9 +311,10 @@ export default function AdminCreateFormation() {
                 </div>
               </div>
 
+              {/* Contenus */}
               <div className="grid w-full gap-3 mb-4">
                 <Label>Contenus du module</Label>
-                {modules[editingModuleIndex].content?.map((item, idx) => (
+                {modules[editingModuleIndex].content.map((item, idx) => (
                   <div
                     key={item.id}
                     className="mb-2 border p-2 grid w-full gap-3 relative">
@@ -327,8 +330,8 @@ export default function AdminCreateFormation() {
                       value={item.subtitle}
                       onChange={(e) =>
                         handleChangeModule(
-                          "contentSubtitle",
-                          e.target.value,
+                          "content",
+                          JSON.stringify({ subtitle: e.target.value }),
                           idx
                         )
                       }
@@ -339,7 +342,11 @@ export default function AdminCreateFormation() {
                       value={item.text}
                       placeholder="Texte du module..."
                       onChange={(e) =>
-                        handleChangeModule("contentText", e.target.value, idx)
+                        handleChangeModule(
+                          "content",
+                          JSON.stringify({ text: e.target.value }),
+                          idx
+                        )
                       }
                       className="border-none bg-gray-100 rounded-none"
                     />
@@ -352,35 +359,12 @@ export default function AdminCreateFormation() {
                   <FaPlus className="inline mr-2" /> Ajouter un contenu
                 </Button>
               </div>
-
-              <h2 className="text-xl font-bold mt-4 mb-2">Aperçu :</h2>
-              {modules[editingModuleIndex].urlIllustration && (
-                <div className="mt-2 mb-4 flex justify-center">
-                  <iframe
-                    width="100%"
-                    height={400}
-                    src={modules[editingModuleIndex].urlIllustration}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen></iframe>
-                </div>
-              )}
-
-              <div className="space-y-4">
-                {modules[editingModuleIndex].content?.map((item) => (
-                  <div
-                    key={item.id}
-                    className="space-y-2">
-                    <h3 className="font-semibold">{item.subtitle}</h3>
-                    <p className="whitespace-pre-line">{item.text}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
         </div>
+
+        {/* --- Questions --- */}
         <div className="flex flex-col gap-4 my-4">
-          {/* Liste des questions */}
           <div className="flex flex-row items-center justify-between">
             <h2 className="text-xl font-bold">Liste des questions :</h2>
             <Button
@@ -390,6 +374,7 @@ export default function AdminCreateFormation() {
             </Button>
           </div>
 
+          {/* Liste */}
           <div className="overflow-x-auto">
             <table className="min-w-full border-collapse border border-gray-200">
               <thead className="edn-degraded text-white text-left">
@@ -413,7 +398,7 @@ export default function AdminCreateFormation() {
                     <td className="px-4 py-2 text-center space-x-2">
                       <FaEdit
                         className="inline cursor-pointer text-blue-500 hover:text-blue-700"
-                        onClick={() => handleEditQuestion(idx)}
+                        onClick={() => setEditingQuestionIndex(idx)}
                       />
                       <FaTrash
                         className="inline cursor-pointer text-red-500 hover:text-red-700"
@@ -426,13 +411,12 @@ export default function AdminCreateFormation() {
             </table>
           </div>
 
-          {/* Formulaire de la question et ses réponses */}
+          {/* Edition d'une question */}
           {editingQuestionIndex !== null && (
             <div className="mt-6 p-4">
               <h2 className="text-xl font-bold mb-4">
                 Édition de la question :
               </h2>
-
               <div className="mb-4">
                 <Input
                   type="text"
@@ -443,6 +427,7 @@ export default function AdminCreateFormation() {
                 />
               </div>
 
+              {/* Réponses */}
               <div className="flex flex-row items-center justify-between mb-2">
                 <h3 className="font-semibold">Réponses :</h3>
                 <Button
