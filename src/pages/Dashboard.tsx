@@ -18,7 +18,7 @@ export default function Dashboard({ token, onLogout }: DashboardProps) {
   if (!userInfo) return <p>Chargement...</p>;
 
   return (
-    <div className="p-4 items-center flex flex-col">
+    <div className="p-4 items-center flex flex-col h-full justify-center">
       <img
         src="/EDN_logo-CMJN-bleu-vertical.jpg"
         alt="EDN - Ecole Du Numérique"

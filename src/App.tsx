@@ -53,8 +53,6 @@ export default function App() {
     setUser(null);
   }
 
-  console.log(user);
-
   return (
     <BrowserRouter>
       <Routes>

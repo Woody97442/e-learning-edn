@@ -95,10 +95,29 @@ export default function LoginForm({ onLogin }: LoginPageProps) {
           Inscrivez-vous
         </Link>
       </div>
-      <p className="mt-4 text-center text-sm text-muted-foreground">
-        Test avec : <br />
-        <code>test@test.com / 123456</code>
-      </p>
+      <div className="mt-4 flex flex-col justify-center gap-2">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
+          Compte de test:
+        </p>
+        <div className="flex justify-center gap-2">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setEmail("test@user.com");
+              setPassword("123456");
+            }}>
+            User
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setEmail("test@admin.com");
+              setPassword("123456");
+            }}>
+            Admin
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
