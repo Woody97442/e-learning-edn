@@ -208,6 +208,25 @@ export default function AdminCreateFormation() {
     if (editingQuestionIndex === questionIndex) setEditingQuestionIndex(null);
   };
 
+  // ---------- SAVE FORMATION ----------
+  const handleSaveFormation = async () => {
+    const formation = {
+      title: "Titre exemple", // tu pourras relier avec l’input Nom de la formation
+      description: "Description exemple", // idem
+      modules,
+      questions,
+    };
+
+    console.log("Formation envoyée :", formation);
+
+    // Exemple d’appel backend
+    // await fetch("/api/formations", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(formation),
+    // });
+  };
+
   // ---------- RENDER ----------
   return (
     <div className="p-6">
@@ -413,7 +432,7 @@ export default function AdminCreateFormation() {
 
           {/* Edition d'une question */}
           {editingQuestionIndex !== null && (
-            <div className="mt-6 p-4">
+            <div className="mt-6 ">
               <h2 className="text-xl font-bold mb-4">
                 Édition de la question :
               </h2>
@@ -428,7 +447,7 @@ export default function AdminCreateFormation() {
               </div>
 
               {/* Réponses */}
-              <div className="flex flex-row items-center justify-between mb-2">
+              <div className="flex flex-row items-center justify-between mb-2 pt-2">
                 <h3 className="font-semibold">Réponses :</h3>
                 <Button
                   variant="edn_hover"
@@ -482,6 +501,15 @@ export default function AdminCreateFormation() {
               </div>
             </div>
           )}
+          {/* --- Bouton final --- */}
+          <div className="flex justify-end ">
+            <Button
+              variant="edn_hover"
+              size="lg"
+              onClick={handleSaveFormation}>
+              Enregistrer la formation
+            </Button>
+          </div>
         </div>
       </div>
     </div>
